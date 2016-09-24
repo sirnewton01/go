@@ -16,7 +16,7 @@ import "strconv"
 // interface.
 func interfaceTable(ifindex int) ([]Interface, error) {
 	if ifindex == 0 {
-		numIfc, err := getNumberInterfaces()
+		numIfc, err := getInterfaceCount()
 		if err != nil {
 			return nil, err
 		}
@@ -58,7 +58,7 @@ func readInterface(id int) (*Interface, error) {
 		return nil, err
 	}
 	statusData := strings.Split(status, " ")
-	if len(statusData) < 18 {
+	if len(statusData) < 4 {
 		return nil, errors.New("Invalid status file of interface: " + ifaceStatus.Name())
 	}
 	device := statusData[1]
@@ -98,7 +98,7 @@ func readInterface(id int) (*Interface, error) {
 	return iface, nil
 }
 
-func getNumberInterfaces() (int, error) {
+func getInterfaceCount() (int, error) {
 	ipifc, err := os.Open(filepath.Join(netdir, "ipifc"))
 	if err != nil {
 		return -1, err
@@ -156,8 +156,7 @@ func interfaceAddrTable(ifi *Interface) ([]Addr, error) {
 		if err != nil {
 			return nil, err
 		}
-		// This may not work on plan line for bell labs, may require testing
-		// Also, this assumes only a single address for the interface
+		// This assumes only a single address for the interface
 		ipline := scanner.Text()
 		if ipline[0:1] != "\t" {
 			return nil, errors.New("Cannot parse IP address for interface")
